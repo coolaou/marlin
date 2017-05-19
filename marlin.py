@@ -22,12 +22,16 @@ socket.setdefaulttimeout(100)
 FirstLine = []
 content = []
 ocontent = []
-ocontent_Lot_level_data = []
 ocontent_Unit_Level_data = []
 ocontent_Unit_Level_Lost_data = []
 ocontent_LOT_level_data = []
+ocontent_STAGE_level_data = []
 temp = []
 lost_lines = []
+
+MONTH_items = []
+WEEK_items = []
+DAY_items = []
 
 UNIT_SERIAL_NUMBER_items = []
 UNIT_SERIAL_NUMBER_items_compress = []
@@ -43,14 +47,17 @@ OPERATION_items = []
 OPERATION_items_compress = []
 OPERATION_BLACK = []
 STAGE_items = []
+STAGE_items_compress = []
 EQPT_ID_items = []
 EQPT_ID_items_compress = []
 SLT_CAT_items = []
+SLT_CAT_items_compress = []
 
 DEVICE_items = []
 PART_NAME_items = []
 TEST_CODE_items = []
 PRODUCT_items = []
+PRODUCT_items_compress = []
 PRODUCT_BLACK_items = []
 SUB_FAMILY_NAME_items = []
 
@@ -117,6 +124,7 @@ PRODUCT_dict = {
 'WEXSPR_SL1': 'ICELAND',
 'MESSXT_SL1': 'ICELAND',
 'MESSLE_SL1': 'ICELAND',
+'MESSPR_SL1': 'ICELAND',
 'MESSLE_SL2': 'ICELAND'
 }
 
@@ -335,6 +343,9 @@ def module_extract_data(ModuleName):
 	global DISP_FLAG_items
 	global STAGE_items
 	global UNIT_TEST_TIME_GROSS_items
+	global MONTH_items
+	global WEEK_items
+	global DAY_items	
 	
  	UNIT_SERIAL_NUMBER_items = [x[FirstLine.index('UNIT_SERIAL_NUMBER')] for x in ocontent]
 	LOT_ID_items = [x[FirstLine.index('LOT_ID')] for x in ocontent]
@@ -362,10 +373,12 @@ def module_extract_data(ModuleName):
 	RANK_ASC_items = [x[FirstLine.index('RANK_ASC')] for x in ocontent]
 	RANK_DESC_items = [x[FirstLine.index('RANK_DESC')] for x in ocontent]	
 	DISP_FLAG_items = [x[FirstLine.index('DISP_FLAG')] for x in ocontent]	
-	STAGE_items_items = [x[FirstLine.index('STAGE')] for x in ocontent]	
+	STAGE_items = [x[FirstLine.index('STAGE')] for x in ocontent]	
 	TEST_CODE_items = [x[FirstLine.index('TEST_CODE')] for x in ocontent]	
 	UNIT_TEST_TIME_GROSS_items = [x[FirstLine.index('UNIT_TEST_TIME_GROSS')] for x in ocontent]	
-	
+	MONTH_items = [x[FirstLine.index('MONTH')] for x in ocontent]	
+	WEEK_items = [x[FirstLine.index('WEEK')] for x in ocontent]	
+	DAY_items = [x[FirstLine.index('DAY')] for x in ocontent]	
 	
 	#print LOT_ID_items_compress[0]
 	ofiles=open(testProgramPath.replace('.csv', '_' + ModuleName + '_intermedia.csv'),'wb')
@@ -569,6 +582,12 @@ def Unit_Level_data():
 			else:
 				RETEST_COUNT_items.append(0)
 
+		if UNIT_TS_items[h] != '':
+ 			MONTH_items.append(int(UNIT_TS_items[h].split(' ')[0].split('-')[1]))
+			WEEK_items.append(datetime.date(int(UNIT_TS_items[h].split(' ')[0].split('-')[0]), int(UNIT_TS_items[h].split(' ')[0].split('-')[1]), int(UNIT_TS_items[h].split(' ')[0].split('-')[2])).isocalendar()[1])
+			DAY_items.append(UNIT_TS_items[h].split(' ')[0])
+
+		
 	#print UNIT_TEST_TIME_GROSS_items
 	for i in range(len(LOT_ID_items)):
 		#print i
@@ -601,6 +620,9 @@ def Unit_Level_data():
 		temp.append(UNIT_NEGATIVE_TIME_items[i])
 		temp.append(UNIT_INDEX_TIME_Cat_items[i])
 		temp.append(RETEST_COUNT_items[i])
+		temp.append(MONTH_items[i])
+		temp.append(WEEK_items[i])
+		temp.append(DAY_items[i])
 		#Writer.writerow(temp)
 		if PRODUCT_items[i] != 'eng':
 			ocontent_Unit_Level_data.append(temp)
@@ -612,7 +634,7 @@ def Unit_Level_data():
 	ofiles=open(testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.'),'wb')
 	
 	Writer = csv.writer(ofiles)
-	FirstLine = ['UNIT_SERIAL_NUMBER', 'RANK_ASC', 'RANK_DESC', 'DISP_FLAG', 'LOT_ID', 'FACILITY', 'OPERATION', 'DEVICE', 'PART_NAME', 'TEST_CODE', 'PRODUCT', 'VARIANT', 'XT_CAT', 'EQPT_ID', 'STAGE', 'SLT_CAT', 'SITE_ID', 'FILE_FINISH_TS', 'UNIT_TS', 'UNIT_TEST_TIME', 'UNIT_TEST_TIME_GROSS', 'UNIT_INDEX_TIME', 'UNIT_PAUSE_TIME', 'UNIT_LONG_PAUSE_TIME', 'UNIT_LOT2LOT_TIME', 'UNIT_IDLE_TIME', 'UNIT_NEGATIVE_TIME', 'UNIT_INDEX_TIME_CAT', 'RETEST_COUNT']
+	FirstLine = ['UNIT_SERIAL_NUMBER', 'RANK_ASC', 'RANK_DESC', 'DISP_FLAG', 'LOT_ID', 'FACILITY', 'OPERATION', 'DEVICE', 'PART_NAME', 'TEST_CODE', 'PRODUCT', 'VARIANT', 'XT_CAT', 'EQPT_ID', 'STAGE', 'SLT_CAT', 'SITE_ID', 'FILE_FINISH_TS', 'UNIT_TS', 'UNIT_TEST_TIME', 'UNIT_TEST_TIME_GROSS', 'UNIT_INDEX_TIME', 'UNIT_PAUSE_TIME', 'UNIT_LONG_PAUSE_TIME', 'UNIT_LOT2LOT_TIME', 'UNIT_IDLE_TIME', 'UNIT_NEGATIVE_TIME', 'UNIT_INDEX_TIME_CAT', 'RETEST_COUNT', 'MONTH', 'WEEK', 'DAY']
 	Writer.writerow(FirstLine)
 	Writer.writerows(ocontent_Unit_Level_data)
 	
@@ -623,7 +645,7 @@ def Unit_Level_data():
 	ofiles=open(testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '_Lost' + '.'),'wb')
 	
 	Writer = csv.writer(ofiles)
-	FirstLine = ['UNIT_SERIAL_NUMBER', 'RANK_ASC', 'RANK_DESC', 'DISP_FLAG', 'LOT_ID', 'FACILITY', 'OPERATION', 'DEVICE', 'PART_NAME', 'TEST_CODE', 'PRODUCT', 'VARIANT', 'XT_CAT', 'EQPT_ID', 'STAGE', 'SLT_CAT', 'SITE_ID', 'FILE_FINISH_TS', 'UNIT_TS', 'UNIT_TEST_TIME', 'UNIT_TEST_TIME_GROSS', 'UNIT_INDEX_TIME', 'UNIT_PAUSE_TIME', 'UNIT_LONG_PAUSE_TIME', 'UNIT_LOT2LOT_TIME', 'UNIT_IDLE_TIME', 'UNIT_NEGATIVE_TIME', 'UNIT_INDEX_TIME_CAT', 'RETEST_COUNT']
+	FirstLine = ['UNIT_SERIAL_NUMBER', 'RANK_ASC', 'RANK_DESC', 'DISP_FLAG', 'LOT_ID', 'FACILITY', 'OPERATION', 'DEVICE', 'PART_NAME', 'TEST_CODE', 'PRODUCT', 'VARIANT', 'XT_CAT', 'EQPT_ID', 'STAGE', 'SLT_CAT', 'SITE_ID', 'FILE_FINISH_TS', 'UNIT_TS', 'UNIT_TEST_TIME', 'UNIT_TEST_TIME_GROSS', 'UNIT_INDEX_TIME', 'UNIT_PAUSE_TIME', 'UNIT_LONG_PAUSE_TIME', 'UNIT_LOT2LOT_TIME', 'UNIT_IDLE_TIME', 'UNIT_NEGATIVE_TIME', 'UNIT_INDEX_TIME_CAT', 'RETEST_COUNT', 'MONTH', 'WEEK', 'DAY']
 	Writer.writerow(FirstLine)
 	Writer.writerows(ocontent_Unit_Level_Lost_data)
 	
@@ -656,6 +678,10 @@ def Lot_Level_data():
 				n = l + LOT_ID_items[l:l+m].index(line3)  #first tester on this lot line num
 				o = LOT_ID_items[l:l+m].count(line3)	#unit num. of this tester
 
+
+				gross = (sum(UNIT_INDEX_TIME_items[n : n+o]) + sum(UNIT_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LONG_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LOT2LOT_TIME_items[n : n+o]) + sum(UNIT_TEST_TIME_items[n : n+o]))
+				interval = (sum(UNIT_INDEX_TIME_items[n : n+o]) + sum(UNIT_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LONG_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LOT2LOT_TIME_items[n : n+o]) + sum(UNIT_IDLE_TIME_items[n : n+o]) + sum(UNIT_TEST_TIME_items[n : n+o]))
+
 				temp.append(line)
 				temp.append(line2)
 				temp.append(line3)
@@ -669,19 +695,32 @@ def Lot_Level_data():
 				temp.append(len(list(set(UNIT_SERIAL_NUMBER_items[n : n+o]))))
 				temp.append(o)
 				temp.append(float(o)/len(list(set(UNIT_SERIAL_NUMBER_items[n : n+o]))))  #IR
+				
 				temp.append(sum(UNIT_TEST_TIME_items[n : n+o])/o)  #average testtime
+				temp.append(sum(UNIT_TEST_TIME_items[n : n+o]))
+				if (gross) != 0:        
+
+					temp.append((float(sum(UNIT_TEST_TIME_items[n : n+o])))/gross)
+				else:
+					temp.append(0)					
+
 				
 				
-				temp.append(o - UNIT_INDEX_TIME_items[n : n+o].count(0))  #index time
-				
-				gross = (sum(UNIT_INDEX_TIME_items[n : n+o]) + sum(UNIT_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LONG_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LOT2LOT_TIME_items[n : n+o]))
-				interval = (sum(UNIT_INDEX_TIME_items[n : n+o]) + sum(UNIT_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LONG_PAUSE_TIME_items[n : n+o]) + sum(UNIT_LOT2LOT_TIME_items[n : n+o]) + sum(UNIT_IDLE_TIME_items[n : n+o]))
-				
+				temp.append(o - UNIT_INDEX_TIME_items[n : n+o].count(0))  #index time				
 				if (o - UNIT_INDEX_TIME_items[n : n+o].count(0)) != 0:
 				
 					temp.append(sum(UNIT_INDEX_TIME_items[n : n+o])/(o - UNIT_INDEX_TIME_items[n : n+o].count(0))) 
 				else:
-					temp.append(0)				
+					temp.append(0)
+									
+				temp.append(sum(UNIT_INDEX_TIME_items[n : n+o])) 	
+				if (gross) != 0:        
+
+					temp.append((float(sum(UNIT_INDEX_TIME_items[n : n+o])))/gross)
+				else:
+					temp.append(0)	
+					
+																	
 				
 				temp.append(o - UNIT_PAUSE_TIME_items[n : n+o].count(0))  #pause time
 				
@@ -690,12 +729,33 @@ def Lot_Level_data():
 					temp.append(sum(UNIT_PAUSE_TIME_items[n : n+o])/(o - UNIT_PAUSE_TIME_items[n : n+o].count(0))) 	
 				else:
 					temp.append(0)
+				temp.append(sum(UNIT_PAUSE_TIME_items[n : n+o])) 	
+				if (gross) != 0:        
+
+					temp.append((float(sum(UNIT_PAUSE_TIME_items[n : n+o])))/gross)
+				else:
+					temp.append(0)						
+					
+					
+		
 									
 				temp.append(o - UNIT_LONG_PAUSE_TIME_items[n : n+o].count(0))  #long pause time
 				if (o - UNIT_LONG_PAUSE_TIME_items[n : n+o].count(0)) != 0:
 					temp.append(sum(UNIT_LONG_PAUSE_TIME_items[n : n+o])/(o - UNIT_LONG_PAUSE_TIME_items[n : n+o].count(0))) 
 				else:
-					temp.append(0)	
+					temp.append(0)
+				temp.append(sum(UNIT_LONG_PAUSE_TIME_items[n : n+o])) 	
+				if (gross) != 0:        
+
+					temp.append((float(sum(UNIT_LONG_PAUSE_TIME_items[n : n+o])))/gross)
+				else:
+					temp.append(0)						
+					
+					
+					
+					
+					
+						
 				temp.append(o - UNIT_LOT2LOT_TIME_items[n : n+o].count(0))  #lot2lot time
 				
 				if (o - UNIT_LOT2LOT_TIME_items[n : n+o].count(0)) != 0:
@@ -704,6 +764,14 @@ def Lot_Level_data():
 				
 				else:
 					temp.append(0)
+				temp.append(sum(UNIT_LOT2LOT_TIME_items[n : n+o])) 	
+				if (gross) != 0:        
+
+					temp.append((float(sum(UNIT_LOT2LOT_TIME_items[n : n+o])))/gross)
+				else:
+					temp.append(0)							
+
+					
 					
 				temp.append(o - UNIT_IDLE_TIME_items[n : n+o].count(0))  #idle time
 					
@@ -713,6 +781,14 @@ def Lot_Level_data():
 				
 				else:
 					temp.append(0)
+				temp.append(sum(UNIT_IDLE_TIME_items[n : n+o])) 	
+				if (interval) != 0:        
+
+					temp.append((float(sum(UNIT_IDLE_TIME_items[n : n+o])))/interval)
+				else:
+					temp.append(0)	
+
+
 
 				temp.append(o - UNIT_NEGATIVE_TIME_items[n : n+o].count(0))  #negative time
 					
@@ -722,8 +798,17 @@ def Lot_Level_data():
 				
 				else:
 					temp.append(0)
+				if (o) != 0:        
+
+					temp.append((float(o - UNIT_NEGATIVE_TIME_items[n : n+o].count(0)))/o)
+				else:
+					temp.append(0)	
+
+
 					
-				temp.append(o - RETEST_COUNT_items[n : n+o].count(0))  #negative time
+					
+					
+				temp.append(o - RETEST_COUNT_items[n : n+o].count(0))  #retest
 				
 				if (o - RETEST_COUNT_items[n : n+o].count(0)) != 0:        
 				
@@ -750,12 +835,207 @@ def Lot_Level_data():
 	ofiles=open(testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.'),'wb')
 	
 	Writer = csv.writer(ofiles)
-	Writer.writerow(['FACILITY', 'OPERATION', 'LOT_ID', 'PRODUCT', 'SLT_CAT', 'VARIANT','XT_CAT', 'QTY_IN', 'TOTAL_TD', 'IR', 'UNIT_TEST_TIME', 'UNIT_INDEX_COUNT', 'UNIT_INDEX_TIME', 'UNIT_PAUSE_COUNT', 'UNIT_PAUSE_TIME', 'UNIT_OTHER_COUNT', 'UNIT_OTHER_TIME', 'UNIT_LOT2LOT_COUNT', 'UNIT_LOT2LOT_TIME', 'UNIT_IDLE_COUNT', 'UNIT_IDLE_TIME', 'UNIT_NEGATIVE_COUNT', 'UNIT_NEGATIVE_TIME', 'RETEST_RATE_COUNT', 'RETEST_RATE', 'USAGE', 'UPHe'])
+	Writer.writerow(['FACILITY', 'OPERATION', 'LOT_ID', 'PRODUCT', 'SLT_CAT', 'VARIANT','XT_CAT', 'QTY_IN', 'TOTAL_TD', 'IR', 'UNIT_TEST_TIME_AVG', 'UNIT_TEST_TIME_SUM', 'UNIT_TEST_TIME_PCT', 'UNIT_INDEX_COUNT', 'UNIT_INDEX_TIME_AVG', 'UNIT_INDEX_TIME_SUM', 'UNIT_INDEX_TIME_PCT', 'UNIT_PAUSE_COUNT', 'UNIT_PAUSE_TIME_AVG', 'UNIT_PAUSE_TIME_SUM', 'UNIT_PAUSE_TIME_PCT', 'UNIT_LONG_PAUSE_COUNT', 'UNIT_LONG_PAUSE_TIME_AVG', 'UNIT_LONG_PAUSE_TIME_SUM', 'UNIT_LONG_PAUSE_TIME_PCT', 'UNIT_LOT2LOT_COUNT', 'UNIT_LOT2LOT_TIME_AVG', 'UNIT_LOT2LOT_TIME_SUM', 'UNIT_LOT2LOT_TIME_PCT', 'UNIT_IDLE_COUNT', 'UNIT_IDLE_TIME_AVG', 'UNIT_IDLE_TIME_SUM', 'UNIT_IDLE_TIME_PCT', 'UNIT_NEGATIVE_COUNT', 'UNIT_NEGATIVE_TIME_AVG', 'UNIT_NEGATIVE_COUNT_PCT', 'RETEST_RATE_COUNT', 'RETEST_RATE', 'USAGE', 'UPHe'])
 	Writer.writerows(ocontent_LOT_level_data)
 	print '##################' + 'final data save to ' + testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.') + '##################'
 	ofiles.close()	
 	ocontent_LOT_level_data = []
+
+
+def Stage_Level_data():
+	global temp
+	global ocontent_STAGE_level_data
+	FACILITY_items_compress = list(set(FACILITY_items))
+	FACILITY_items_compress.sort()
+	for line in FACILITY_items_compress:
+		
+		j = FACILITY_items.index(line)   # first unit on this lot line num
+		k = FACILITY_items.count(line)   #  unit num. of lot 
+		#print line, j, k
+		SLT_CAT_items_compress = list(set(SLT_CAT_items[j:j+k]))
+		SLT_CAT_items_compress.sort
+		
+		for line2 in SLT_CAT_items_compress:
+					
+			l = j + SLT_CAT_items[j:j+k].index(line2)  #first tester on this lot line num
+			m = SLT_CAT_items[j:j+k].count(line2)	#unit num. of this tester
+			PRODUCT_items_compress = list(set(PRODUCT_items[l:l+m]))
+			PRODUCT_items_compress.sort
+				
+			for line3 in PRODUCT_items_compress:
 			
+				n = l + PRODUCT_items[l:l+m].index(line3)  #first tester on this lot line num
+				o = PRODUCT_items[l:l+m].count(line3)	#unit num. of this tester
+				STAGE_items_compress = list(set(STAGE_items[n:n+o]))
+				STAGE_items_compress.sort
+				print line, line2, line3, STAGE_items_compress, n, o
+				for line4 in STAGE_items_compress:
+				
+					p = n + STAGE_items[n:n+o].index(line4)  #first tester on this lot line num
+					q = STAGE_items[n:n+o].count(line4)	#unit num. of this tester
+					
+					gross = (sum(UNIT_INDEX_TIME_items[p : p+q]) + sum(UNIT_PAUSE_TIME_items[p : p+q]) + sum(UNIT_LONG_PAUSE_TIME_items[p : p+q]) + sum(UNIT_LOT2LOT_TIME_items[p : p+q]) + sum(UNIT_TEST_TIME_items[p : p+q]))
+					interval = (sum(UNIT_INDEX_TIME_items[p : p+q]) + sum(UNIT_PAUSE_TIME_items[p : p+q]) + sum(UNIT_LONG_PAUSE_TIME_items[p : p+q]) + sum(UNIT_LOT2LOT_TIME_items[p : p+q]) + sum(UNIT_IDLE_TIME_items[p : p+q]) + sum(UNIT_TEST_TIME_items[p : p+q]))
+
+					temp.append(line)
+					temp.append(line2)
+					temp.append(line3)
+					temp.append(line4)
+					#temp.append(PRODUCT_dict.get(DEVICE_items[p], 'eng'))
+					temp.append(VARIANT_items[p])
+					temp.append(XT_CAT_items[p])
+
+				
+					temp.append(len(list(set(UNIT_SERIAL_NUMBER_items[p : p+q]))))
+					temp.append(q)
+					temp.append(float(q)/len(list(set(UNIT_SERIAL_NUMBER_items[p : p+q]))))  #IR
+				
+					temp.append(sum(UNIT_TEST_TIME_items[p : p+q])/o)  #average testtime
+					temp.append(sum(UNIT_TEST_TIME_items[p : p+q]))
+					if (gross) != 0:        
+
+						temp.append((float(sum(UNIT_TEST_TIME_items[p : p+q])))/gross)
+					else:
+						temp.append(0)					
+
+				
+				
+					temp.append(q - UNIT_INDEX_TIME_items[p : p+q].count(0))  #index time				
+					if (q - UNIT_INDEX_TIME_items[p : p+q].count(0)) != 0:
+				
+						temp.append(sum(UNIT_INDEX_TIME_items[p : p+q])/(q - UNIT_INDEX_TIME_items[p : p+q].count(0))) 
+					else:
+						temp.append(0)
+										
+					temp.append(sum(UNIT_INDEX_TIME_items[p : p+q])) 	
+					if (gross) != 0:        
+
+						temp.append((float(sum(UNIT_INDEX_TIME_items[p : p+q])))/gross)
+					else:
+						temp.append(0)	
+					
+																	
+				
+					temp.append(q - UNIT_PAUSE_TIME_items[p : p+q].count(0))  #pause time
+				
+					if (q - UNIT_PAUSE_TIME_items[p : p+q].count(0)) != 0:
+				
+						temp.append(sum(UNIT_PAUSE_TIME_items[p : p+q])/(q - UNIT_PAUSE_TIME_items[p : p+q].count(0))) 	
+					else:
+						temp.append(0)
+					temp.append(sum(UNIT_PAUSE_TIME_items[p : p+q])) 	
+					if (gross) != 0:        
+
+						temp.append((float(sum(UNIT_PAUSE_TIME_items[p : p+q])))/gross)
+					else:
+						temp.append(0)						
+					
+					
+		
+									
+					temp.append(q - UNIT_LONG_PAUSE_TIME_items[p : p+q].count(0))  #long pause time
+					if (q - UNIT_LONG_PAUSE_TIME_items[p : p+q].count(0)) != 0:
+						temp.append(sum(UNIT_LONG_PAUSE_TIME_items[p : p+q])/(q - UNIT_LONG_PAUSE_TIME_items[p : p+q].count(0))) 
+					else:
+						temp.append(0)
+					temp.append(sum(UNIT_LONG_PAUSE_TIME_items[p : p+q])) 	
+					if (gross) != 0:        
+
+						temp.append((float(sum(UNIT_LONG_PAUSE_TIME_items[p : p+q])))/gross)
+					else:
+						temp.append(0)						
+					
+					
+					
+					
+					
+						
+					temp.append(q - UNIT_LOT2LOT_TIME_items[p : p+q].count(0))  #lot2lot time
+				
+					if (q - UNIT_LOT2LOT_TIME_items[p : p+q].count(0)) != 0:
+				
+						temp.append(sum(UNIT_LOT2LOT_TIME_items[p : p+q])/(q - UNIT_LOT2LOT_TIME_items[p : p+q].count(0))) 
+				
+					else:
+						temp.append(0)
+					temp.append(sum(UNIT_LOT2LOT_TIME_items[p : p+q])) 	
+					if (gross) != 0:        
+
+						temp.append((float(sum(UNIT_LOT2LOT_TIME_items[p : p+q])))/gross)
+					else:
+						temp.append(0)							
+
+					
+					
+					temp.append(q - UNIT_IDLE_TIME_items[p : p+q].count(0))  #idle time
+					
+					if (q - UNIT_IDLE_TIME_items[p : p+q].count(0)) != 0:
+				
+						temp.append(sum(UNIT_IDLE_TIME_items[p : p+q])/(q - UNIT_IDLE_TIME_items[p : p+q].count(0))) 
+				
+					else:
+						temp.append(0)
+					temp.append(sum(UNIT_IDLE_TIME_items[p : p+q])) 	
+					if (interval) != 0:        
+
+						temp.append((float(sum(UNIT_IDLE_TIME_items[p : p+q])))/interval)
+					else:
+						temp.append(0)	
+
+
+
+					temp.append(q - UNIT_NEGATIVE_TIME_items[p : p+q].count(0))  #negative time
+					
+					if (q - UNIT_NEGATIVE_TIME_items[p : p+q].count(0)) != 0:
+				
+						temp.append(sum(UNIT_NEGATIVE_TIME_items[p : p+q])/(q - UNIT_NEGATIVE_TIME_items[p : p+q].count(0))) 
+				
+					else:
+						temp.append(0)
+					if (q) != 0:        
+
+						temp.append((float(q - UNIT_NEGATIVE_TIME_items[p : p+q].count(0)))/o)
+					else:
+						temp.append(0)	
+
+
+					
+					
+					
+					temp.append(q - RETEST_COUNT_items[p : p+q].count(0))  #retest
+				
+					if (q - RETEST_COUNT_items[p : p+q].count(0)) != 0:        
+				
+						temp.append(sum(RETEST_COUNT_items[p : p+q])/float(q - RETEST_COUNT_items[p : p+q].count(0)))
+				
+					else:
+						temp.append(0)	
+				
+					#usage
+					if (interval) != 0:        
+				
+						temp.append(float(gross)/interval)
+					else:
+						temp.append(0)
+					#uhpe
+					if (gross) != 0:        
+
+						temp.append((float(q)*3600)/gross)
+				
+					else:
+						temp.append(0)									
+					ocontent_STAGE_level_data.append(temp)
+					temp = []
+	ofiles=open(testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.'),'wb')
+	
+	Writer = csv.writer(ofiles)
+	Writer.writerow(['FACILITY', 'SLT_CAT', 'PRODUCT', 'STAGE', 'VARIANT','XT_CAT', 'QTY_IN', 'TOTAL_TD', 'IR', 'UNIT_TEST_TIME_AVG', 'UNIT_TEST_TIME_SUM', 'UNIT_TEST_TIME_PCT', 'UNIT_INDEX_COUNT', 'UNIT_INDEX_TIME_AVG', 'UNIT_INDEX_TIME_SUM', 'UNIT_INDEX_TIME_PCT', 'UNIT_PAUSE_COUNT', 'UNIT_PAUSE_TIME_AVG', 'UNIT_PAUSE_TIME_SUM', 'UNIT_PAUSE_TIME_PCT', 'UNIT_LONG_PAUSE_COUNT', 'UNIT_LONG_PAUSE_TIME_AVG', 'UNIT_LONG_PAUSE_TIME_SUM', 'UNIT_LONG_PAUSE_TIME_PCT', 'UNIT_LOT2LOT_COUNT', 'UNIT_LOT2LOT_TIME_AVG', 'UNIT_LOT2LOT_TIME_SUM', 'UNIT_LOT2LOT_TIME_PCT', 'UNIT_IDLE_COUNT', 'UNIT_IDLE_TIME_AVG', 'UNIT_IDLE_TIME_SUM', 'UNIT_IDLE_TIME_PCT', 'UNIT_NEGATIVE_COUNT', 'UNIT_NEGATIVE_TIME_AVG', 'UNIT_NEGATIVE_COUNT_PCT', 'RETEST_RATE_COUNT', 'RETEST_RATE', 'USAGE', 'UPHe'])
+	Writer.writerows(ocontent_STAGE_level_data)
+	print '##################' + 'final data save to ' + testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.') + '##################'
+	ofiles.close()	
+	ocontent_STAGE_level_data = []
+
+	
 if __name__ == "__main__":
 	print DIE2DIE_LIMIT_dict['ASLT']['INDEX_PAUSE']
 	database = shelve.open(sys.path[0] + '/' + 'product.db')
@@ -827,7 +1107,15 @@ if __name__ == "__main__":
 	module_extract_data('Lot_Level')
 	Lot_Level_data()
 	
+# ?Facility > Tester Type > Product > Insertion > Site (total site)
 	
+
+	
+	ocontent = sorted(ocontent_Unit_Level_data, key = lambda x: (x[FirstLine.index('FACILITY')], x[FirstLine.index('SLT_CAT')], x[FirstLine.index('PRODUCT')], x[FirstLine.index('STAGE')]))  # facility firstly, then operation, then lot_ID
+
+	#print content
+	module_extract_data('Stage_Level')
+	Stage_Level_data()	
 	
 	database.sync()
 	database.close()
