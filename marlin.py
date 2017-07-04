@@ -20,6 +20,7 @@ import socket
 
 socket.setdefaulttimeout(100)
 FirstLine = []
+UPHe_dict = []
 content = []
 ocontent = []
 ocontent_Unit_Level_data = []
@@ -175,8 +176,15 @@ def combination(DAY_items, EQPT_ID_items, SITE_items):
 			
 		
 
+def search_UPHe(FACILITY, PRODUCT, STAGE):
 	
-	
+	for line in UPHe_dict:
+		if line['Standard_Fac'] == FACILITY and line['Standard_Family'] == PRODUCT and line['Standard_Stage'] == STAGE:
+		
+			return {'UPHe': line['Weighted_UPH_Target'], 'TEST_TIME': line['Weighted_TT_Target'], 'IR': line['Weighted_IR_Target'], 'USAGE': line['Weighted_USG_Target']}
+			
+		
+	return {'UPHe': 'missing', 'TEST_TIME': 'missing', 'IR': 'missing', 'USAGE': 'missing'}
 
 	
 PRODUCT_dict = {
@@ -216,6 +224,29 @@ OPERATION_dict = {
 }
 
 STAGE_dict = {
+'6275': 'SLT1',
+'6277': 'HST',
+'6278': 'KST',
+'6288': 'ASLT',
+'6378': 'KST',
+'6478': 'SSLT',
+'6900': 'SL1',
+'6901': 'SL2',
+'7161': 'HST',
+'7167': 'HST',
+'7190': 'KST',
+'7465': 'HST',
+'7565': 'HSLT2',
+'KSLT': 'KST',
+'SL1': 'SL1',
+'SL2': 'SL2',
+'SL3': 'SL3',
+'SL4': 'SL4',
+'SL5': 'SL5',
+'7507': 'HCESLT'
+}
+
+STAGE_dict_old = {
 '6275': 'SLT1',
 '6277': 'HPBI_HSLT',
 '6278': 'kSLT',
@@ -1020,8 +1051,12 @@ def Stage_Level_data():
 					temp.append(len(list(set(UNIT_SERIAL_NUMBER_items[p : p+q]))))
 					temp.append(q)
 					temp.append(float(q)/len(list(set(UNIT_SERIAL_NUMBER_items[p : p+q]))))  #IR
+					
+					temp.append(search_UPHe(line, line3, line4)['IR'])	# search the IR database								
 				
 					temp.append(sum(UNIT_TEST_TIME_items[p : p+q])/o)  #average testtime
+					temp.append(search_UPHe(line, line3, line4)['TEST_TIME'])	# search the TT database								
+					
 					temp.append(sum(UNIT_TEST_TIME_items[p : p+q]))
 					if (gross) != 0:        
 
@@ -1154,6 +1189,9 @@ def Stage_Level_data():
 						temp.append(float(gross)/(interval*coefficient[2]/coefficient[1]))
 					else:
 						temp.append(0)
+						
+					temp.append(search_UPHe(line, line3, line4)['USAGE'])	# search the usage database								
+						
 					temp.append(float(coefficient[1])/coefficient[2])
 					max_index = p + UNIT_TS_items[p : p+q].index(max(UNIT_TS_items[p : p+q]))
 					min_index = p + UNIT_TS_items[p : p+q].index(min(UNIT_TS_items[p : p+q])) 
@@ -1175,13 +1213,15 @@ def Stage_Level_data():
 						temp.append((float(len(list(set(UNIT_SERIAL_NUMBER_items[p : p+q]))))*3600)/gross)
 				
 					else:
-						temp.append(0)									
+						temp.append(0)
+					
+					temp.append(search_UPHe(line, line3, line4)['UPHe'])	# search the uphe database								
 					ocontent_STAGE_level_data.append(temp)
 					temp = []
 	ofiles=open(testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.'),'wb')
 	
 	Writer = csv.writer(ofiles)
-	Writer.writerow(['FACILITY', 'SLT_CAT', 'PRODUCT', 'STAGE', 'CONFIG_SITES', 'VARIANT','XT_CAT', 'QTY_IN', 'TOTAL_TD', 'IR', 'UNIT_TEST_TIME_AVG', 'UNIT_TEST_TIME_SUM', 'UNIT_TEST_TIME_PCT', 'UNIT_INDEX_COUNT', 'UNIT_INDEX_TIME_AVG', 'UNIT_INDEX_TIME_SUM', 'UNIT_INDEX_TIME_PCT', 'UNIT_PAUSE_COUNT', 'UNIT_PAUSE_TIME_AVG', 'UNIT_PAUSE_TIME_SUM', 'UNIT_PAUSE_TIME_PCT', 'UNIT_LONG_PAUSE_COUNT', 'UNIT_LONG_PAUSE_TIME_AVG', 'UNIT_LONG_PAUSE_TIME_SUM', 'UNIT_LONG_PAUSE_TIME_PCT', 'UNIT_LOT2LOT_COUNT', 'UNIT_LOT2LOT_TIME_AVG', 'UNIT_LOT2LOT_TIME_SUM', 'UNIT_LOT2LOT_TIME_PCT', 'UNIT_IDLE_COUNT', 'UNIT_IDLE_TIME_AVG', 'UNIT_IDLE_TIME_SUM', 'UNIT_IDLE_TIME_PCT', 'UNIT_NEGATIVE_COUNT', 'UNIT_NEGATIVE_TIME_AVG', 'UNIT_NEGATIVE_COUNT_PCT', 'RETEST_RATE_COUNT', 'RETEST_RATE', 'USAGE_DURATION', 'SITE_ENABLE_PCT', 'SITES_COUNT_DURATION', 'USAGE_24HOURS', 'SITES_COUNT_24HOURS', 'UPHe'])
+	Writer.writerow(['FACILITY', 'SLT_CAT', 'PRODUCT', 'STAGE', 'CONFIG_SITES', 'VARIANT','XT_CAT', 'QTY_IN', 'TOTAL_TD', 'IR', 'IR_POR', 'UNIT_TEST_TIME_AVG', 'TEST_TIME_POR', 'UNIT_TEST_TIME_SUM', 'UNIT_TEST_TIME_PCT', 'UNIT_INDEX_COUNT', 'UNIT_INDEX_TIME_AVG', 'UNIT_INDEX_TIME_SUM', 'UNIT_INDEX_TIME_PCT', 'UNIT_PAUSE_COUNT', 'UNIT_PAUSE_TIME_AVG', 'UNIT_PAUSE_TIME_SUM', 'UNIT_PAUSE_TIME_PCT', 'UNIT_LONG_PAUSE_COUNT', 'UNIT_LONG_PAUSE_TIME_AVG', 'UNIT_LONG_PAUSE_TIME_SUM', 'UNIT_LONG_PAUSE_TIME_PCT', 'UNIT_LOT2LOT_COUNT', 'UNIT_LOT2LOT_TIME_AVG', 'UNIT_LOT2LOT_TIME_SUM', 'UNIT_LOT2LOT_TIME_PCT', 'UNIT_IDLE_COUNT', 'UNIT_IDLE_TIME_AVG', 'UNIT_IDLE_TIME_SUM', 'UNIT_IDLE_TIME_PCT', 'UNIT_NEGATIVE_COUNT', 'UNIT_NEGATIVE_TIME_AVG', 'UNIT_NEGATIVE_COUNT_PCT', 'RETEST_RATE_COUNT', 'RETEST_RATE', 'USAGE_DURATION', 'USAGE_POR', 'SITE_ENABLE_PCT', 'SITES_COUNT_DURATION', 'USAGE_24HOURS', 'SITES_COUNT_24HOURS', 'UPHe', 'UPHe_POR'])
 	Writer.writerows(ocontent_STAGE_level_data)
 	print '##################' + 'final data save to ' + testProgramPath.replace('.', '_' + sys._getframe().f_code.co_name + '.') + '##################'
 	ofiles.close()	
@@ -2110,6 +2150,13 @@ def Site_Level_data():
 	
 if __name__ == "__main__":
 	print DIE2DIE_LIMIT_dict['ASLT']['INDEX_PAUSE']
+	
+	files=open('Weighted_UPH_Target.csv','rb')  #read UPHe database
+	Reader=csv.DictReader(files)
+	for row in Reader:
+  		UPHe_dict.append(row)
+	files.close()
+	
 	database = shelve.open(sys.path[0] + '/' + 'product.db')
 #   lot level data	
 	#files=open(testProgramPath,'rb')
